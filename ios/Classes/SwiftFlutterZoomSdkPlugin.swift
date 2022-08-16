@@ -25,12 +25,8 @@ public class SwiftFlutterZoomSdkPlugin: NSObject, FlutterPlugin,FlutterStreamHan
           switch call.method {
           case "init":
               self.initZoom(call: call, result: result)
-          case "login":
-              self.login(call: call, result: result)
           case "join":
               self.joinMeeting(call: call, result: result)
-          case "startNormal":
-              self.startMeetingNormal(call: call, result: result)
           case "meeting_status":
               self.meetingStatus(call: call, result: result)
           case "meeting_details":
@@ -45,12 +41,8 @@ public class SwiftFlutterZoomSdkPlugin: NSObject, FlutterPlugin,FlutterStreamHan
           switch call.method {
           case "init":
               self.initZoom(call: call, result: result)
-          case "login":
-              self.login(call: call, result: result)
           case "join":
               self.joinMeeting(call: call, result: result)
-          case "start":
-              self.startMeetingNormal(call: call, result: result)
           case "meeting_status":
               self.meetingStatus(call: call, result: result)
           case "meeting_details":
@@ -83,36 +75,6 @@ public class SwiftFlutterZoomSdkPlugin: NSObject, FlutterPlugin,FlutterStreamHan
             }
 
             auth?.sdkAuth()
-        }
-
-        //Perform start meeting function with logging in to the zoom account
-        public func login(call: FlutterMethodCall, result: @escaping FlutterResult) {
-              let authService = MobileRTC.shared().getAuthService()
-                
-              if ((authService?.isLoggedIn()) == true) {
-                  self.startMeeting(call:call, result:result);
-              }else{
-                  let arguments = call.arguments as! Dictionary<String, String?>
-                  authService?.login(withEmail: arguments["userId"]!!, password: arguments["userPassword"]!!, rememberMe: false)
-                  if ((authService?.isLoggedIn()) == true) {
-                      self.startMeeting(call:call, result:result);
-                  }
-              }
-        }
-    
-        //Perform start meeting function with logging in to the zoom account (Only for passed meeting id)
-        public func startMeetingNormal(call: FlutterMethodCall, result: @escaping FlutterResult) {
-                let authService = MobileRTC.shared().getAuthService()
-                  
-                if ((authService?.isLoggedIn()) == true) {
-                    self.startMeetingNormalInternal(call:call, result:result);
-                }else{
-                    let arguments = call.arguments as! Dictionary<String, String?>
-                    authService?.login(withEmail: arguments["userId"]!!, password: arguments["userPassword"]!!, rememberMe: false)
-                    if ((authService?.isLoggedIn()) == true) {
-                        self.startMeetingNormalInternal(call:call, result:result);
-                    }
-                }
         }
 
         //Listen to meeting status on joinning and starting the mmeting
