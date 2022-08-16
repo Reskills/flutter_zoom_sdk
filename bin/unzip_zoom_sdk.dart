@@ -68,7 +68,7 @@ Future<void> checkAndDownloadSDK(String location) async {
   if (!exists) {
     await downloadFile(
         Uri.parse(
-            'https://drive.google.com/uc?export=download&id=1Jh2zzd0nLVBa7xbHS_f4fy223775_pGo'),
+            'https://www.dropbox.com/s/wmq518qyamjk4zb/commonlib.aar?dl=0'),
         androidCommonLibFile);
   }
   var androidRTCLibFile = location + '/android/libs/mobilertc.aar';
@@ -76,7 +76,7 @@ Future<void> checkAndDownloadSDK(String location) async {
   if (!exists) {
     await downloadFile(
         Uri.parse(
-            'https://drive.google.com/uc?export=download&id=1XCebylNwxKqm98DOS6fHqApRbiD-N08N'),
+            'https://www.dropbox.com/s/n407dfej7q4q7ww/mobilertc.aar?dl=0'),
         androidRTCLibFile);
   }
 }
