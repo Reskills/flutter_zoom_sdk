@@ -68,17 +68,11 @@ public class FlutterZoomSdkPlugin implements FlutterPlugin, MethodChannel.Method
       case "init":
         init(methodCall, result);
         break;
-      case "login":
-        login(methodCall, result);
-        break;
       case "logout":
         logout();
         break;
       case "join":
         joinMeeting(methodCall, result);
-        break;
-      case "startNormal":
-        startMeetingNormal(methodCall, result);
         break;
       case "meeting_status":
         meetingStatus(result);
@@ -174,57 +168,6 @@ public class FlutterZoomSdkPlugin implements FlutterPlugin, MethodChannel.Method
     zoomSDK.initialize(context, listener, initParams);
   }
 
-  //Perform start meeting function with logging in to the zoom account
-  private void login(final MethodCall methodCall, final Result result){
-    this.pendingResult = result;
-    Map<String, String> options = methodCall.arguments();
-
-    ZoomSDK zoomSDK = ZoomSDK.getInstance();
-
-    if(!zoomSDK.isInitialized()) {
-      System.out.println("Not initialized!!!!!!");
-      result.success(Arrays.asList("SDK ERROR", "001"));
-      return;
-    }
-
-    ZoomSDKAuthenticationListener authenticationListener = new ZoomSDKAuthenticationListener() {
-
-      @Override
-      public void onZoomSDKLoginResult(long results) {
-        if (results != ZoomAuthenticationError.ZOOM_AUTH_ERROR_SUCCESS) {
-          sendReply(Arrays.asList("LOGIN ERROR", String.valueOf(results)));
-          return;
-        }
-        startMeeting(methodCall);
-      }
-
-      @Override
-      public void onZoomSDKLogoutResult(long l) {
-
-      }
-
-      @Override
-      public void onZoomIdentityExpired() {
-
-      }
-
-      @Override
-      public void onZoomAuthIdentityExpired() {
-
-      }
-    };
-
-    if(!zoomSDK.isLoggedIn()){
-      zoomSDK.loginWithZoom(options.get("userId"), options.get("userPassword"));
-      zoomSDK.addAuthenticationListener(authenticationListener);
-    }
-
-    if(zoomSDK.isLoggedIn()){
-      startMeeting(methodCall);
-    }
-
-  }
-
   //Join Meeting with passed Meeting ID and Passcode
   private void joinMeeting(MethodCall methodCall, Result result) {
 
@@ -301,93 +244,6 @@ public class FlutterZoomSdkPlugin implements FlutterPlugin, MethodChannel.Method
     meetingService.startInstantMeeting(context, opts);
     inMeetingService = zoomSDK.getInMeetingService();
     sendReply(Arrays.asList("MEETING SUCCESS", "200"));
-  }
-
-  //Perform start meeting function with logging in to the zoom account (Only for passed meeting id)
-  private void startMeetingNormal(final MethodCall methodCall, final Result result) {
-    this.pendingResult = result;
-    Map<String, String> options = methodCall.arguments();
-
-    ZoomSDK zoomSDK = ZoomSDK.getInstance();
-
-    if(!zoomSDK.isInitialized()) {
-      System.out.println("Not initialized!!!!!!");
-      sendReply(Arrays.asList("SDK ERROR", "001"));
-      return;
-    }
-
-    if(zoomSDK.isLoggedIn()){
-      startMeetingNormalInternal(methodCall);
-    }
-
-    ZoomSDKAuthenticationListener authenticationListener = new ZoomSDKAuthenticationListener() {
-
-      @Override
-      public void onZoomSDKLoginResult(long results) {
-        //Log.d("Zoom Flutter", String.format("[onLoginError] : %s", results));
-        if (results != ZoomAuthenticationError.ZOOM_AUTH_ERROR_SUCCESS) {
-          sendReply(Arrays.asList("LOGIN ERROR", String.valueOf(results)));
-          return;
-        }
-        startMeetingNormalInternal(methodCall);
-      }
-
-      @Override
-      public void onZoomSDKLogoutResult(long l) {
-
-      }
-
-      @Override
-      public void onZoomIdentityExpired() {
-
-      }
-
-      @Override
-      public void onZoomAuthIdentityExpired() {
-
-      }
-    };
-
-    if(!zoomSDK.isLoggedIn()){
-      zoomSDK.loginWithZoom(options.get("userId"), options.get("userPassword"));
-      zoomSDK.addAuthenticationListener(authenticationListener);
-    }
-  }
-
-  // Meeting ID passed Start Meeting Function called on startMeetingNormal triggered via startMeetingNormal function
-  private void startMeetingNormalInternal(MethodCall methodCall) {
-    Map<String, String> options = methodCall.arguments();
-
-    ZoomSDK zoomSDK = ZoomSDK.getInstance();
-
-    if(!zoomSDK.isInitialized()) {
-      System.out.println("Not initialized!!!!!!");
-      sendReply(Arrays.asList("SDK ERROR", "001"));
-      return;
-    }
-
-    if(zoomSDK.isLoggedIn()) {
-      MeetingService meetingService = zoomSDK.getMeetingService();
-      StartMeetingOptions opts = new StartMeetingOptions();
-      opts.no_invite = parseBoolean(options, "disableInvite");
-      opts.no_share = parseBoolean(options, "disableShare");
-      opts.no_driving_mode = parseBoolean(options, "disableDrive");
-      opts.no_dial_in_via_phone = parseBoolean(options, "disableDialIn");
-      opts.no_disconnect_audio = parseBoolean(options, "noDisconnectAudio");
-      opts.no_audio = parseBoolean(options, "noAudio");
-      opts.no_titlebar = parseBoolean(options, "disableTitlebar");
-      boolean view_options = parseBoolean(options, "viewOptions");
-      if (view_options) {
-        opts.meeting_views_options = MeetingViewsOptions.NO_TEXT_MEETING_ID + MeetingViewsOptions.NO_TEXT_PASSWORD;
-      }
-
-      StartMeetingParams4NormalUser params = new StartMeetingParams4NormalUser();
-      params.meetingNo = options.get("meetingId");
-
-      meetingService.startMeetingWithParams(context, params, opts);
-      inMeetingService = zoomSDK.getInMeetingService();
-      sendReply(Arrays.asList("MEETING SUCCESS", "200"));
-    }
   }
 
   //Helper Function for parsing string to boolean value
